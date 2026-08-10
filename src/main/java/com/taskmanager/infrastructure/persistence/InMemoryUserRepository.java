@@ -41,4 +41,14 @@ public class InMemoryUserRepository implements UserRepository {
     public void deleteAccount(String id){
         userList.removeIf(user -> user.getId().equals(id));
     }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        for (User user : userList) {
+            if (user.getEmail().equals(email)) {
+                return Optional.of(user);
+            }
+        }
+        return Optional.empty();
+    }
 }

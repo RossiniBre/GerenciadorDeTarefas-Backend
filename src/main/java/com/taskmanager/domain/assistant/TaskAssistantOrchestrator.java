@@ -208,7 +208,23 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
         ListTasksUseCase.TaskFilter filter = taskFilterResolver.resolve(filterIntent);
         List<Task> tasks = listTasksUseCase.execute(requesterId, filter);
         String formatted = answerFormatter.format(answerFormatterInstructions, jsonMapper.toJson(tasks));
+
+        if (isInvalidFormatterResponse(formatted)) {
+            System.out.println("Resposta inválida do AnswerFormatter, ignorando. raw=" + formatted);
+            return new AssistantResponse.OutOfScope(
+                    "Não consegui montar sua lista de tarefas agora. Pode tentar de novo?");
+        }
+
         return new AssistantResponse.InformationalAnswer(formatted);
+    }
+
+    private boolean isInvalidFormatterResponse(String formatted) {
+        if (formatted == null || formatted.isBlank()) {
+            return true;
+        }
+        String normalized = formatted.strip();
+        return normalized.regionMatches(true, 0, "User Safety:", 0, "User Safety:".length())
+                || normalized.length() < 3;
     }
 
     private List<TaskSuggestion> toSuggestions(List<SuggestionData> raw) {

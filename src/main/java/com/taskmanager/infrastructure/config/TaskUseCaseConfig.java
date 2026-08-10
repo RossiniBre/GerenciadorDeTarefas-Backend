@@ -5,9 +5,11 @@ import com.taskmanager.application.CreateNotificationUseCase;
 import com.taskmanager.application.ListTasksUseCase;
 import com.taskmanager.application.UpdateTaskDetailsUseCase;
 import com.taskmanager.application.DeleteTaskUseCase;
+import com.taskmanager.application.DeleteAccountUseCase;
 import com.taskmanager.application.RescheduleNotificationsUseCase;
 import com.taskmanager.application.CancelNotificationsUseCase;
 import com.taskmanager.domain.repositories.TaskRepository;
+import com.taskmanager.domain.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,5 +36,10 @@ public class TaskUseCaseConfig {
     @Bean
     public DeleteTaskUseCase deleteTaskUseCase(TaskRepository taskRepository, CancelNotificationsUseCase cancelNotificationsUseCase) {
         return new DeleteTaskUseCase(taskRepository, cancelNotificationsUseCase);
+    }
+
+    @Bean
+    public DeleteAccountUseCase deleteAccountUseCase(UserRepository userRepository, TaskRepository taskRepository, DeleteTaskUseCase deleteTaskUseCase) {
+        return new DeleteAccountUseCase(userRepository, taskRepository, deleteTaskUseCase);
     }
 }

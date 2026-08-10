@@ -1,9 +1,11 @@
 package com.taskmanager.infrastructure.http.controllers;
 
 import com.taskmanager.application.AuthenticateUserUseCase;
+import com.taskmanager.application.DeleteAccountUseCase;
 import com.taskmanager.application.RegisterUserUseCase;
 import com.taskmanager.domain.model.User;
 import com.taskmanager.domain.repositories.SessionRepository;
+import com.taskmanager.infrastructure.http.AuthenticatedUser;
 import com.taskmanager.infrastructure.http.dto.LoginUserRequest;
 import com.taskmanager.infrastructure.http.dto.LoginUserResponse;
 import com.taskmanager.infrastructure.http.dto.RegisterUserRequest;
@@ -18,18 +20,20 @@ public class UsersController {
     private final RegisterUserUseCase registerUserUseCase;
     private final AuthenticateUserUseCase authenticateUserUseCase;
     private final SessionRepository sessionRepository;
+    private final DeleteAccountUseCase deleteAccountUseCase;
 
     public UsersController(RegisterUserUseCase registerUserUseCase,
                            AuthenticateUserUseCase authenticateUserUseCase,
-                           SessionRepository sessionRepository) {
+                           SessionRepository sessionRepository, DeleteAccountUseCase deleteAccountUseCase) {
         this.registerUserUseCase = registerUserUseCase;
         this.authenticateUserUseCase = authenticateUserUseCase;
         this.sessionRepository = sessionRepository;
+        this.deleteAccountUseCase = deleteAccountUseCase;
     }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> register(@RequestBody RegisterUserRequest request) {
-        User user = registerUserUseCase.execute(request.username, request.password);
+        User user = registerUserUseCase.execute(request.email, request.username, request.password);
         var response = new RegisterUserResponse(user.getId(), user.getUsername());
         return ResponseEntity.status(201).body(response);
     }
@@ -37,7 +41,7 @@ public class UsersController {
     @PostMapping("/login")
     public ResponseEntity<LoginUserResponse> login(@RequestBody LoginUserRequest request) {
         AuthenticateUserUseCase.Session session =
-                authenticateUserUseCase.execute(request.username, request.password);
+                authenticateUserUseCase.execute(request.identifier, request.password);
 
         var response = new LoginUserResponse(
                 session.getUser().getId(),
@@ -53,6 +57,17 @@ public class UsersController {
             String token = authHeader.substring("Bearer ".length()).trim();
             sessionRepository.delete(token);
         }
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteAccount(@AuthenticatedUser User user,
+                                              @RequestHeader("Authorization") String authHeader) {
+        deleteAccountUseCase.execute(user.getId());
+
+        String token = authHeader.substring("Bearer ".length()).trim();
+        sessionRepository.delete(token);
+
         return ResponseEntity.noContent().build();
     }
 }

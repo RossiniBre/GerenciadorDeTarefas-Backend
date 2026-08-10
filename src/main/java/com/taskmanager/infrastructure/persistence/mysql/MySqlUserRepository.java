@@ -21,17 +21,19 @@ public class MySqlUserRepository implements UserRepository {
     @Override
     public User save(User user) {
         String sql = """
-                INSERT INTO users (id, username, password_hash)
-                VALUES (?, ?, ?)
+                INSERT INTO users (id, email, username, password_hash)
+                VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE
+                    email = VALUES(email),
                     username = VALUES(username),
                     password_hash = VALUES(password_hash)
                 """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getId());
-            ps.setString(2, user.getUsername());
-            ps.setString(3, user.getPasswordHash());
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getUsername());
+            ps.setString(4, user.getPasswordHash());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RepositoryException("Erro ao salvar usuário.", e);
@@ -49,8 +51,9 @@ public class MySqlUserRepository implements UserRepository {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String id = rs.getString("id");
+                    String email = rs.getString("email");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltUser(id, username, passwordHash);
+                    User user = User.rebuiltUser(id, email, username, passwordHash);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();
@@ -58,6 +61,29 @@ public class MySqlUserRepository implements UserRepository {
             }
         } catch (SQLException e) {
             throw new RepositoryException("Erro ao buscar usuário por username", e);
+        }
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String id = rs.getString("id");
+                    String username = rs.getString("username");
+                    String passwordHash = rs.getString("password_hash");
+                    User user = User.rebuiltUser(id, email, username, passwordHash);
+                    return Optional.of(user);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RepositoryException("Erro ao buscar usuário por email", e);
         }
     }
 
@@ -70,9 +96,10 @@ public class MySqlUserRepository implements UserRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
+                    String email = rs.getString("email");
                     String username = rs.getString("username");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltUser(id, username, passwordHash);
+                    User user = User.rebuiltUser(id, email, username, passwordHash);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();

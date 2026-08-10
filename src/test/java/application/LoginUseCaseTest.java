@@ -22,7 +22,7 @@ public class LoginUseCaseTest {
         RegisterUserUseCase registerUseCase = new RegisterUserUseCase(repo, hasher);
 
         //Act
-        User registeredUser = registerUseCase.execute("joao123", "minhaSenha123");
+        User registeredUser = registerUseCase.execute("joao123@example.com", "joao123", "minhaSenha123");
         User loginUser = loginUseCase.execute("joao123", "minhaSenha123");
 
         // Assert
@@ -50,7 +50,7 @@ public class LoginUseCaseTest {
         PasswordHasher hasher = new Pbkdf2PasswordHasher();
         LoginUseCase loginUseCase = new LoginUseCase(repo, hasher);
         RegisterUserUseCase registerUseCase = new RegisterUserUseCase(repo, hasher);
-        registerUseCase.execute("joao123", "minhaSenha123");
+        registerUseCase.execute("joao123@example.com", "joao123", "minhaSenha123");
 
         // Act & Assert
         assertThrows(InvalidCredentialsException.class, () ->

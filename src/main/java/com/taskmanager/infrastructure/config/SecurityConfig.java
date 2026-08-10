@@ -50,9 +50,11 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticateUserUseCase authenticateUserUseCase(LoginUseCase loginUseCase,
+                                                           UserRepository userRepository,
                                                            SessionRepository sessionRepository,
                                                            TokenGenerator tokenGenerator,
                                                            LoginRateLimiter loginRateLimiter) {
-        return new AuthenticateUserUseCase(loginUseCase, sessionRepository, tokenGenerator, loginRateLimiter);
+        return new AuthenticateUserUseCase(loginUseCase, userRepository, sessionRepository, tokenGenerator,
+                loginRateLimiter);
     }
 }

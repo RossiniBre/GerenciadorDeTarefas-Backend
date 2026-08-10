@@ -4,6 +4,22 @@ server:
 spring:
   application:
     name: task-manager
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 db:
   host: ${DB_HOST}
@@ -13,3 +29,6 @@ db:
 
 assistant:
   api-key: ${ASSISTANT_API_KEY}
+
+mail:
+  from: ${MAIL_FROM}

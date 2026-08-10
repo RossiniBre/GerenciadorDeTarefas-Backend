@@ -22,12 +22,13 @@ public class LoginUseCase {
         this.passwordHasher = passwordHasher;
     }
 
-    public User execute(String username, String password) {
+    public User execute(String identifier, String password) {
         // 1
-        CredentialsValidator.validate(username, password);
+        CredentialsValidator.validate(identifier, password);
 
         // 2
-        Optional<User> foundUser = userRepository.findByUsername(username);
+        Optional<User> foundUser = userRepository.findByEmail(identifier)
+                .or(() -> userRepository.findByUsername(identifier));
         if (foundUser.isEmpty()) {
             throw new InvalidCredentialsException();
         }

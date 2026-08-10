@@ -16,7 +16,7 @@ public class StartTaskUseCaseTest {
         // Arrange
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
 
-        User user = User.newUser("owner123", "senhaHash");
+        User user = User.newUser("owner@example.com", "ownerUser", "senhaHash");
 
         Task existingTask = Task.newTask(
                 "Titulo original",

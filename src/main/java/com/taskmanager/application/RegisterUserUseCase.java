@@ -5,6 +5,7 @@ import com.taskmanager.domain.security.PasswordHasher;
 import com.taskmanager.domain.model.User;
 import com.taskmanager.domain.repositories.UserRepository;
 import com.taskmanager.domain.exceptions.DuplicateUsernameException;
+import com.taskmanager.domain.exceptions.DuplicateEmailException;
 
 public class RegisterUserUseCase {
     private final UserRepository userRepository;
@@ -21,7 +22,7 @@ public class RegisterUserUseCase {
         this.passwordHasher = passwordHasher;
     }
 
-    public User execute(String username, String password){
+    public User execute(String email, String username, String password){
         // 1
         CredentialsValidator.validate(username, password);
 
@@ -29,12 +30,15 @@ public class RegisterUserUseCase {
         if (userRepository.findByUsername(username).isPresent()){
             throw new DuplicateUsernameException(username);
         }
+        if (userRepository.findByEmail(email).isPresent()){
+            throw new DuplicateEmailException(email);
+        }
 
         // 3
         String hashedPassword = passwordHasher.hash(password);
 
         // 4
-        User registeredUser = User.newUser(username, hashedPassword);
+        User registeredUser = User.newUser(email, username, hashedPassword);
 
         // 5
         return userRepository.save(registeredUser);

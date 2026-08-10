@@ -33,7 +33,7 @@ class CreateTaskUseCaseTest {
                 new CreateNotificationUseCase(notificationRepository, scheduleCalculator);
 
         CreateTaskUseCase useCase = new CreateTaskUseCase(repo, fixedClock, createNotificationUseCase);
-        User owner = User.newUser("owner-123", "hash-fake-123");
+        User owner = User.newUser("owner@example.com", "ownerUser", "hash-fake-123");
 
         LocalDateTime dueDate = LocalDateTime.of(2026, 8, 10, 18, 0);
         LocalDateTime reminderDate = LocalDateTime.of(2026, 8, 9, 9, 0);
