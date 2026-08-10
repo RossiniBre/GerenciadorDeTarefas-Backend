@@ -1,8 +1,17 @@
-# Task Manager
+# Task Manager - Backend
 
 A task management backend built incrementally to learn **Clean Architecture**, **SOLID**, **Design Patterns**, **Domain-Driven Design (DDD)**, and **Spec-Driven Development** using Java.
 
 The project started without frameworks to understand backend architecture and gradually evolved into a Spring Boot application with persistence, authentication, authorization, REST APIs, AI integration, notifications, and automated testing.
+
+---
+
+## Frontend
+
+The frontend application is being developed separately and will consume this backend through its REST API.
+
+**Frontend Repository:**
+https://github.com/RossiniBre/GerenciadorDeTarefas-Frontend
 
 ---
 
@@ -204,19 +213,19 @@ The domain layer has no dependency on:
 
 # Roadmap
 
-| Phase | Status      | Scope |
-| ----- |-------------| ----- |
-| 1     | Done        | Task creation |
-| 2     | Done        | Update, delete, tests |
-| 3     | Done        | Categories, priorities, Builder |
-| 4     | Done        | Users, authentication, authorization |
-| 5     | Done        | MySQL persistence, REST API, HTTP adapters |
+| Phase | Status      | Scope                                                            |
+| ----- |-------------|------------------------------------------------------------------|
+| 1     | Done        | Task creation                                                    |
+| 2     | Done        | Update, delete, tests                                            |
+| 3     | Done        | Categories, priorities, Builder                                  |
+| 4     | Done        | Users, authentication, authorization                             |
+| 5     | Done        | MySQL persistence, REST API, HTTP adapters                       |
 | 6     | Done        | AI assistant workflow, conversational memory and task operations |
-| 7     | Done        | Due dates and notification workflow |
-| 8     | Done        | Migration to Spring Boot |
-| 9     | Done        | Backend refinement and production architecture |
-| 10    | In progress | Frontend application |
-| 11    |             | Deployment and production environment |
+| 7     | Done        | Due dates and notification workflow                              |
+| 8     | Done        | Migration to Spring Boot                                         |
+| 9     | Done        | Backend refinement and production architecture                   |
+| 10    | In progress | Frontend application - https://github.com/RossiniBre/GerenciadorDeTarefas-Frontend|
+| 11    |             | Deployment and production environment                            |
 ----------------------------------------------------------
 
 
