@@ -24,19 +24,25 @@ public class TasksController {
     private final DeleteTaskUseCase deleteTaskUseCase;
     private final ListNotificationsUseCase listNotificationsUseCase;
     private final TaskRepository taskRepository;
+    private final StartTaskUseCase startTaskUseCase;
+    private final CompleteTaskUseCase completeTaskUseCase;
 
     public TasksController(CreateTaskUseCase createTaskUseCase,
                            ListTasksUseCase listTasksUseCase,
                            UpdateTaskDetailsUseCase updateTaskUseCase,
                            DeleteTaskUseCase deleteTaskUseCase,
                            ListNotificationsUseCase listNotificationsUseCase,
-                           TaskRepository taskRepository) {
+                           TaskRepository taskRepository,
+                           StartTaskUseCase startTaskUseCase,
+                           CompleteTaskUseCase completeTaskUseCase) {
         this.createTaskUseCase = createTaskUseCase;
         this.listTasksUseCase = listTasksUseCase;
         this.updateTaskUseCase = updateTaskUseCase;
         this.deleteTaskUseCase = deleteTaskUseCase;
         this.listNotificationsUseCase = listNotificationsUseCase;
         this.taskRepository = taskRepository;
+        this.startTaskUseCase = startTaskUseCase;
+        this.completeTaskUseCase = completeTaskUseCase;
     }
 
     @PostMapping
@@ -79,7 +85,7 @@ public class TasksController {
 
         List<TaskItemDto> items = tasks.stream()
                 .map(t -> new TaskItemDto(
-                        t.getId(), t.getTitle(), t.getStatus().name(), t.getPriority().name(), t.getCategory().name()))
+                        t.getId(), t.getTitle(), t.getDescription(), t.getStatus().name(), t.getPriority().name(), t.getCategory().name(), t.getDueDate()))
                 .toList();
 
         return ResponseEntity.ok(items);
@@ -130,5 +136,23 @@ public class TasksController {
                 .toList();
 
         return ResponseEntity.ok(new ListNotificationsResponse(items));
+    }
+
+    @PostMapping("/{id}/start")
+    public ResponseEntity<TaskItemDto> start(@AuthenticatedUser User user, @PathVariable String id) {
+        Task task = startTaskUseCase.execute(id, user);
+        var response = new TaskItemDto(
+                task.getId(), task.getTitle(), task.getDescription(), task.getStatus().name(),
+                task.getPriority().name(), task.getCategory().name(), task.getDueDate());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/complete")
+    public ResponseEntity<TaskItemDto> complete(@AuthenticatedUser User user, @PathVariable String id) {
+        Task task = completeTaskUseCase.execute(id, user);
+        var response = new TaskItemDto(
+                task.getId(), task.getTitle(), task.getDescription(), task.getStatus().name(),
+                task.getPriority().name(), task.getCategory().name(), task.getDueDate());
+        return ResponseEntity.ok(response);
     }
 }

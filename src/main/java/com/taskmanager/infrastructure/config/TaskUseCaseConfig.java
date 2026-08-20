@@ -1,13 +1,6 @@
 package com.taskmanager.infrastructure.config;
 
-import com.taskmanager.application.CreateTaskUseCase;
-import com.taskmanager.application.CreateNotificationUseCase;
-import com.taskmanager.application.ListTasksUseCase;
-import com.taskmanager.application.UpdateTaskDetailsUseCase;
-import com.taskmanager.application.DeleteTaskUseCase;
-import com.taskmanager.application.DeleteAccountUseCase;
-import com.taskmanager.application.RescheduleNotificationsUseCase;
-import com.taskmanager.application.CancelNotificationsUseCase;
+import com.taskmanager.application.*;
 import com.taskmanager.domain.repositories.TaskRepository;
 import com.taskmanager.domain.repositories.UserRepository;
 import org.springframework.context.annotation.Bean;
