@@ -13,7 +13,7 @@ import java.time.Instant;
 
 public class AuthenticateUserUseCase {
 
-    private static final Duration SESSION_DURATION = Duration.ofHours(2);
+    private static final Duration SESSION_DURATION = Duration.ofHours(72);
 
     private final LoginUseCase loginUseCase;
     private final UserRepository userRepository;

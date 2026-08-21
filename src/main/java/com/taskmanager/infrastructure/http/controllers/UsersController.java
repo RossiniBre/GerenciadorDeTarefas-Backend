@@ -6,10 +6,7 @@ import com.taskmanager.application.RegisterUserUseCase;
 import com.taskmanager.domain.model.User;
 import com.taskmanager.domain.repositories.SessionRepository;
 import com.taskmanager.infrastructure.http.AuthenticatedUser;
-import com.taskmanager.infrastructure.http.dto.LoginUserRequest;
-import com.taskmanager.infrastructure.http.dto.LoginUserResponse;
-import com.taskmanager.infrastructure.http.dto.RegisterUserRequest;
-import com.taskmanager.infrastructure.http.dto.RegisterUserResponse;
+import com.taskmanager.infrastructure.http.dto.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,5 +66,15 @@ public class UsersController {
         sessionRepository.delete(token);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getMe(@AuthenticatedUser User user) {
+
+        var response = new UserResponse(
+                user.getId(),
+                user.getUsername()
+        );
+        return ResponseEntity.ok(response);
     }
 }
