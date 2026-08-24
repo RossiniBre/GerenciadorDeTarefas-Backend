@@ -3,6 +3,7 @@ package com.taskmanager.infrastructure.http.controllers;
 import com.taskmanager.application.AuthenticateUserUseCase;
 import com.taskmanager.application.DeleteAccountUseCase;
 import com.taskmanager.application.RegisterUserUseCase;
+import com.taskmanager.application.UpdateUserProfileUseCase;
 import com.taskmanager.domain.model.User;
 import com.taskmanager.domain.repositories.SessionRepository;
 import com.taskmanager.infrastructure.http.AuthenticatedUser;
@@ -18,20 +19,22 @@ public class UsersController {
     private final AuthenticateUserUseCase authenticateUserUseCase;
     private final SessionRepository sessionRepository;
     private final DeleteAccountUseCase deleteAccountUseCase;
+    private final UpdateUserProfileUseCase updateUserProfileUseCase;
 
     public UsersController(RegisterUserUseCase registerUserUseCase,
                            AuthenticateUserUseCase authenticateUserUseCase,
-                           SessionRepository sessionRepository, DeleteAccountUseCase deleteAccountUseCase) {
+                           SessionRepository sessionRepository, DeleteAccountUseCase deleteAccountUseCase, UpdateUserProfileUseCase updateUserProfileUseCase) {
         this.registerUserUseCase = registerUserUseCase;
         this.authenticateUserUseCase = authenticateUserUseCase;
         this.sessionRepository = sessionRepository;
         this.deleteAccountUseCase = deleteAccountUseCase;
+        this.updateUserProfileUseCase = updateUserProfileUseCase;
     }
 
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> register(@RequestBody RegisterUserRequest request) {
-        User user = registerUserUseCase.execute(request.email, request.username, request.password);
-        var response = new RegisterUserResponse(user.getId(), user.getUsername());
+        User user = registerUserUseCase.execute(request.email, request.username, request.password, request.displayName);
+        var response = new RegisterUserResponse(user.getId(), user.getUsername(), user.getEmail(), user.getDisplayName());
         return ResponseEntity.status(201).body(response);
     }
 
@@ -73,8 +76,17 @@ public class UsersController {
 
         var response = new UserResponse(
                 user.getId(),
-                user.getUsername()
+                user.getUsername(),
+                user.getEmail(),
+                user.getDisplayName()
         );
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserResponse> updateProfile(@AuthenticatedUser User user,
+                                                      @RequestBody UpdateUserProfileRequest request) {
+        User updated = updateUserProfileUseCase.execute(user.getId(), request.username, request.email, request.displayName);
+        return ResponseEntity.ok(new UserResponse(updated.getId(), updated.getUsername(), updated.getEmail(), updated.getDisplayName()));
     }
 }

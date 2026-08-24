@@ -46,7 +46,7 @@ public class ResetPasswordUseCase {
                 .orElseThrow(InvalidOrExpiredTokenException::new);
 
         String hashedPassword = passwordHasher.hash(newPassword);
-        User updatedUser = User.rebuiltUser(user.getId(), user.getEmail(), user.getUsername(), hashedPassword);
+        User updatedUser = User.rebuiltUser(user.getId(), user.getEmail(), user.getUsername(), hashedPassword, user.getDisplayName());
         userRepository.save(updatedUser);
 
         tokenRepository.markAsUsed(resetToken.getId());

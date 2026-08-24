@@ -3,6 +3,7 @@ package com.taskmanager.infrastructure.config;
 import com.taskmanager.application.AuthenticateUserUseCase;
 import com.taskmanager.application.LoginUseCase;
 import com.taskmanager.application.RegisterUserUseCase;
+import com.taskmanager.application.UpdateUserProfileUseCase;
 import com.taskmanager.domain.repositories.SessionRepository;
 import com.taskmanager.domain.repositories.UserRepository;
 import com.taskmanager.domain.security.LoginRateLimiter;
@@ -46,6 +47,11 @@ public class SecurityConfig {
     @Bean
     public RegisterUserUseCase registerUserUseCase(UserRepository userRepository, PasswordHasher passwordHasher) {
         return new RegisterUserUseCase(userRepository, passwordHasher);
+    }
+
+    @Bean
+    public UpdateUserProfileUseCase updateUserProfileUseCase(UserRepository userRepository) {
+        return new UpdateUserProfileUseCase(userRepository);
     }
 
     @Bean

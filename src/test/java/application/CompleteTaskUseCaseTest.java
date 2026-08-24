@@ -20,7 +20,7 @@ public class CompleteTaskUseCaseTest {
         CancelNotificationsUseCase cancelNotificationsUseCase = new CancelNotificationsUseCase(notificationRepository);
         InMemoryTaskRepository repo = new InMemoryTaskRepository();
 
-        User user = User.newUser("owner@example.com", "owner123", "senhaHash");
+        User user = User.newUser("owner@example.com", "owner123", "senhaHash", "Owner");
 
         Task existingTask = Task.newTask(
                 "Titulo original",

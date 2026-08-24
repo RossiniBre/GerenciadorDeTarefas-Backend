@@ -56,7 +56,7 @@ class ForgotPasswordUseCaseTest {
 
     @Test
     void invalidatesExistingTokensBeforeCreatingNewOne() {
-        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw");
+        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw", "Owner");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
         when(tokenGenerator.generate()).thenReturn("raw-token");
         when(tokenHasher.hash("raw-token")).thenReturn("hashed-token");
@@ -73,7 +73,7 @@ class ForgotPasswordUseCaseTest {
 
     @Test
     void savesTokenWithHashUserAndExpiration() {
-        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw");
+        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw", "Owner");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
         when(tokenGenerator.generate()).thenReturn("raw-token");
         when(tokenHasher.hash("raw-token")).thenReturn("hashed-token");
@@ -91,7 +91,7 @@ class ForgotPasswordUseCaseTest {
 
     @Test
     void sendsRawTokenNeverTheHashToUserEmail() {
-        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw");
+        User user = User.rebuiltUser("user-1", "user@example.com", "user", "hashed-pw", "Owner");
         when(userRepository.findByEmail("user@example.com")).thenReturn(Optional.of(user));
         when(tokenGenerator.generate()).thenReturn("raw-token");
         when(tokenHasher.hash("raw-token")).thenReturn("hashed-token");

@@ -115,7 +115,7 @@ class ResetPasswordUseCaseTest {
     void successfulResetUpdatesPasswordMarksTokenUsedAndInvalidatesRest() {
         PasswordResetToken validToken = PasswordResetToken.rebuiltToken(
                 "token-1", "user-1", "hashed-token", FIXED_NOW.plusSeconds(600), null);
-        User user = User.rebuiltUser("user-1", "user@example.com", "user", "old-hashed-pw");
+        User user = User.rebuiltUser("user-1", "user@example.com", "user", "old-hashed-pw", "Owner");
 
         when(tokenHasher.hash("raw-token")).thenReturn("hashed-token");
         when(tokenRepository.findByTokenHash("hashed-token")).thenReturn(Optional.of(validToken));

@@ -63,7 +63,7 @@ class ConfirmTaskSuggestionUseCaseTest {
                 completeTaskUseCase
         );
 
-        owner = User.newUser("owner@example.com", "ownerUser", "hash-fake-123");
+        owner = User.newUser("owner@example.com", "ownerUser", "hash-fake-123", "Owner");
     }
 
     @Test
@@ -188,7 +188,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
     @Test
     void shouldThrowWhenConfirmingSuggestionForTaskOwnedByAnotherUser() {
-        User anotherUser = User.newUser("owner@example.com", "ownerUser", "hash-fake-123");
+        User anotherUser = User.newUser("owner@example.com", "ownerUser", "hash-fake-123", "Owner");
         Task existing = Task.newTask("Titulo", "Descricao", anotherUser.getId(), null, null);
         taskRepository.save(existing);
 

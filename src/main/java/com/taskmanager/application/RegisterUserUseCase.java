@@ -22,7 +22,7 @@ public class RegisterUserUseCase {
         this.passwordHasher = passwordHasher;
     }
 
-    public User execute(String email, String username, String password){
+    public User execute(String email, String username, String password, String displayName){
         // 1
         CredentialsValidator.validate(username, password);
 
@@ -38,7 +38,7 @@ public class RegisterUserUseCase {
         String hashedPassword = passwordHasher.hash(password);
 
         // 4
-        User registeredUser = User.newUser(email, username, hashedPassword);
+        User registeredUser = User.newUser(email, username, hashedPassword, displayName);
 
         // 5
         return userRepository.save(registeredUser);

@@ -21,7 +21,7 @@ class RegisterUserUseCaseTest {
         RegisterUserUseCase useCase = new RegisterUserUseCase(repo, hasher);
 
         // Act
-        User registeredUser = useCase.execute("joao123@example.com", "joao123", "minhaSenha123");
+        User registeredUser = useCase.execute("joao123@example.com", "joao123", "minhaSenha123", "Owner");
 
         // Assert
         assertNotNull(registeredUser.getId());
@@ -38,7 +38,7 @@ class RegisterUserUseCaseTest {
 
         // Act & Assert
         assertThrows(InvalidFieldException.class, () ->
-                useCase.execute("joao123@example.com", "", "minhaSenha123"));
+                useCase.execute("joao123@example.com", "", "minhaSenha123", "Owner"));
     }
 
     @Test
@@ -50,7 +50,7 @@ class RegisterUserUseCaseTest {
 
         // Act & Assert
         assertThrows(InvalidFieldException.class, () ->
-                useCase.execute("joao123@example.com", "joao123", ""));
+                useCase.execute("joao123@example.com", "joao123", "", "Owner"));
     }
 
     @Test
@@ -59,10 +59,10 @@ class RegisterUserUseCaseTest {
         UserRepository repo = new InMemoryUserRepository();
         PasswordHasher hasher = new Pbkdf2PasswordHasher();
         RegisterUserUseCase useCase = new RegisterUserUseCase(repo, hasher);
-        useCase.execute("joao123@example.com", "joao123", "minhaSenha123");
+        useCase.execute("joao123@example.com", "joao123", "minhaSenha123", "Owner");
 
         // Act & Assert
         assertThrows(DuplicateUsernameException.class, () ->
-                useCase.execute("outro@example.com", "joao123", "outraSenha456"));
+                useCase.execute("outro@example.com", "joao123", "outraSenha456", "Owner"));
     }
 }

@@ -21,19 +21,21 @@ public class MySqlUserRepository implements UserRepository {
     @Override
     public User save(User user) {
         String sql = """
-                INSERT INTO users (id, email, username, password_hash)
-                VALUES (?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE
-                    email = VALUES(email),
-                    username = VALUES(username),
-                    password_hash = VALUES(password_hash)
-                """;
+            INSERT INTO users (id, email, username, password_hash, display_name)
+            VALUES (?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                email = VALUES(email),
+                username = VALUES(username),
+                password_hash = VALUES(password_hash),
+                display_name = VALUES(display_name)
+            """;
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getId());
             ps.setString(2, user.getEmail());
             ps.setString(3, user.getUsername());
             ps.setString(4, user.getPasswordHash());
+            ps.setString(5, user.getDisplayName());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new RepositoryException("Erro ao salvar usuário.", e);
@@ -53,7 +55,8 @@ public class MySqlUserRepository implements UserRepository {
                     String id = rs.getString("id");
                     String email = rs.getString("email");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltUser(id, email, username, passwordHash);
+                    String displayName = rs.getString("display_name");
+                    User user = User.rebuiltUser(id, email, username, passwordHash, displayName);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();
@@ -76,7 +79,8 @@ public class MySqlUserRepository implements UserRepository {
                     String id = rs.getString("id");
                     String username = rs.getString("username");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltUser(id, email, username, passwordHash);
+                    String displayName = rs.getString("display_name");
+                    User user = User.rebuiltUser(id, email, username, passwordHash, displayName);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();
@@ -99,7 +103,8 @@ public class MySqlUserRepository implements UserRepository {
                     String email = rs.getString("email");
                     String username = rs.getString("username");
                     String passwordHash = rs.getString("password_hash");
-                    User user = User.rebuiltUser(id, email, username, passwordHash);
+                    String displayName = rs.getString("display_name");
+                    User user = User.rebuiltUser(id, email, username, passwordHash, displayName);
                     return Optional.of(user);
                 } else {
                     return Optional.empty();

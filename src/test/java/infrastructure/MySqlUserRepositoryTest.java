@@ -33,7 +33,7 @@ class MySqlUserRepositoryTest {
 
     @Test
     void savesUserWithAllFieldsBound() throws SQLException {
-        User user = User.rebuiltUser("user-1", "breno@email.com", "breno", "hashed-pw");
+        User user = User.rebuiltUser("user-1", "breno@email.com", "breno", "hashed-pw", "Owner");
 
         User result = repository.save(user);
 
@@ -41,13 +41,14 @@ class MySqlUserRepositoryTest {
         verify(preparedStatement).setString(2, "breno@email.com");
         verify(preparedStatement).setString(3, "breno");
         verify(preparedStatement).setString(4, "hashed-pw");
+        verify(preparedStatement).setString(5, "Owner");
         verify(preparedStatement).executeUpdate();
         assertSame(user, result);
     }
 
     @Test
     void saveWrapsSqlExceptionInRepositoryException() throws SQLException {
-        User user = User.rebuiltUser("user-1", "breno@email.com", "breno", "hashed-pw");
+        User user = User.rebuiltUser("user-1", "breno@email.com", "breno", "hashed-pw", "Owner");
         when(preparedStatement.executeUpdate()).thenThrow(new SQLException("boom"));
 
         RepositoryException ex = assertThrows(RepositoryException.class, () -> repository.save(user));
@@ -61,6 +62,7 @@ class MySqlUserRepositoryTest {
         when(resultSet.getString("id")).thenReturn("user-1");
         when(resultSet.getString("email")).thenReturn("breno@email.com");
         when(resultSet.getString("password_hash")).thenReturn("hashed-pw");
+        when(resultSet.getString("display_name")).thenReturn("Owner");
 
         Optional<User> result = repository.findByUsername("breno");
 
@@ -96,6 +98,7 @@ class MySqlUserRepositoryTest {
         when(resultSet.getString("id")).thenReturn("user-1");
         when(resultSet.getString("username")).thenReturn("breno");
         when(resultSet.getString("password_hash")).thenReturn("hashed-pw");
+        when(resultSet.getString("display_name")).thenReturn("Owner");
 
         Optional<User> result = repository.findByEmail("breno@email.com");
 
@@ -130,6 +133,7 @@ class MySqlUserRepositoryTest {
         when(resultSet.getString("email")).thenReturn("breno@email.com");
         when(resultSet.getString("username")).thenReturn("breno");
         when(resultSet.getString("password_hash")).thenReturn("hashed-pw");
+        when(resultSet.getString("display_name")).thenReturn("Owner");
 
         Optional<User> result = repository.findById("user-1");
 
