@@ -1,4 +1,4 @@
-# Task Manager - Backend
+# Task Nexus - Backend
 
 A task management backend built incrementally to learn **Clean Architecture**, **SOLID**, **Design Patterns**, **Domain-Driven Design (DDD)**, and **Spec-Driven Development** using Java.
 

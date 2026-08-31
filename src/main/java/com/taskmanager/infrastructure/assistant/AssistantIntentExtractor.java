@@ -20,6 +20,8 @@ public class AssistantIntentExtractor implements IntentExtractor {
     private static final String ENDPOINT =
             "https://openrouter.ai/api/v1/chat/completions";
 
+    private static final int MAX_ATTEMPTS = 2;
+
     private final HttpClient httpClient;
     private final JsonMapper jsonMapper;
     private final String apiKey;
@@ -36,6 +38,23 @@ public class AssistantIntentExtractor implements IntentExtractor {
 
     @Override
     public String extract(String instructions, String userMessage) {
+        RuntimeException lastFailure = null;
+
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            try {
+                return callModel(instructions, userMessage);
+            } catch (InvalidIntentResponseException e) {
+                lastFailure = e;
+                System.out.println("Tentativa " + attempt + " de " + MAX_ATTEMPTS
+                        + " retornou resposta inválida (não-JSON). " +
+                        (attempt < MAX_ATTEMPTS ? "Tentando novamente..." : "Sem mais tentativas."));
+            }
+        }
+
+        throw lastFailure;
+    }
+
+    private String callModel(String instructions, String userMessage) {
         String prompt = instructions + "\n\nMensagem do usuário: " + userMessage;
 
         Map<String, Object> body = Map.of(
@@ -45,7 +64,8 @@ public class AssistantIntentExtractor implements IntentExtractor {
                                 "role", "user",
                                 "content", prompt
                         )
-                )
+                ),
+                "reasoning", Map.of("exclude", true)
         );
 
         // debug
@@ -61,6 +81,9 @@ public class AssistantIntentExtractor implements IntentExtractor {
 
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // debug
+            System.out.println("ASSISTANT raw response: " + response.body());
 
             if (response.statusCode() == 429) {
                 throw buildRateLimitException(response.body());
@@ -120,6 +143,21 @@ public class AssistantIntentExtractor implements IntentExtractor {
         Map<String, Object> message =
                 (Map<String, Object>) choices.get(0).get("message");
 
-        return (String) message.get("content");
+        String content = (String) message.get("content");
+
+        if (!looksLikeJson(content)) {
+            throw new InvalidIntentResponseException(
+                    "ASSISTANT retornou conteúdo que não parece JSON: " + content);
+        }
+
+        return content;
+    }
+
+    private boolean looksLikeJson(String content) {
+        if (content == null) {
+            return false;
+        }
+        String trimmed = content.strip();
+        return trimmed.startsWith("{") || trimmed.startsWith("```");
     }
 }

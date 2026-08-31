@@ -1,10 +1,25 @@
 package com.taskmanager.domain.assistant;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.taskmanager.domain.model.TaskPriority;
 import com.taskmanager.domain.model.TaskCategory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.NAME,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "action"
+)
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = TaskSuggestion.Create.class, name = "CREATE"),
+        @JsonSubTypes.Type(value = TaskSuggestion.Update.class, name = "UPDATE"),
+        @JsonSubTypes.Type(value = TaskSuggestion.Delete.class, name = "DELETE"),
+        @JsonSubTypes.Type(value = TaskSuggestion.Start.class, name = "START"),
+        @JsonSubTypes.Type(value = TaskSuggestion.Complete.class, name = "COMPLETE")
+})
 
 public sealed interface TaskSuggestion permits
         TaskSuggestion.Create,

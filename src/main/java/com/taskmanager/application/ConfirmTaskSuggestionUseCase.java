@@ -54,8 +54,8 @@ public class ConfirmTaskSuggestionUseCase {
                             loggedUser,
                             s.priority(),
                             s.category(),
-                            null,   // dueDate
-                            null    // reminderDate
+                            s.dueDate(),
+                            s.reminderDate()
                     );
 
             case TaskSuggestion.Update s ->
@@ -64,8 +64,8 @@ public class ConfirmTaskSuggestionUseCase {
                             s.description(),
                             s.priority(),
                             s.category(),
-                            null,   // dueDate
-                            null,   // reminderDate
+                            s.dueDate(),
+                            s.reminderDate(),
                             s.targetTaskId(),
                             requesterId
                     );

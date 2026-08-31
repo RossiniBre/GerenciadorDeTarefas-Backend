@@ -60,10 +60,11 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(AssistantRateLimitExceededException.class)
-    public ResponseEntity<Map<String, String>> handleAssistantRateLimitExceeded(AssistantRateLimitExceededException e) {
-        String message = e.getResetsAt() != null
-                ? "Você está sem Tokens até " + e.getResetsAt().format(HOUR_FORMATTER)
-                : "Você está sem Tokens no momento. Tente novamente mais tarde";
+    public ResponseEntity<Map<String, String>> handleAssistantRateLimitExceeded(
+            AssistantRateLimitExceededException e) {
+
+        String message = "Não foi possível processar sua mensagem no momento. Tente novamente.";
+
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                 .body(Map.of("error", message));
     }

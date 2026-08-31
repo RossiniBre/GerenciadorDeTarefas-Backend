@@ -207,24 +207,61 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
     private AssistantResponse handleListing(TaskFilterIntent filterIntent, String requesterId) {
         ListTasksUseCase.TaskFilter filter = taskFilterResolver.resolve(filterIntent);
         List<Task> tasks = listTasksUseCase.execute(requesterId, filter);
-        String formatted = answerFormatter.format(answerFormatterInstructions, jsonMapper.toJson(tasks));
 
-        if (isInvalidFormatterResponse(formatted)) {
-            System.out.println("Resposta inválida do AnswerFormatter, ignorando. raw=" + formatted);
-            return new AssistantResponse.OutOfScope(
-                    "Não consegui montar sua lista de tarefas agora. Pode tentar de novo?");
+        String formatted;
+        try {
+            formatted = answerFormatter.format(answerFormatterInstructions, jsonMapper.toJson(tasks));
+
+            if (isInvalidFormatterResponse(formatted, tasks)) {
+                System.out.println("Resposta inválida do AnswerFormatter, usando fallback. raw=" + formatted);
+                formatted = fallbackFormat(tasks);
+            }
+        } catch (RuntimeException e) {
+            System.out.println("AnswerFormatter falhou completamente, usando fallback. erro=" + e.getMessage());
+            formatted = fallbackFormat(tasks);
         }
 
         return new AssistantResponse.InformationalAnswer(formatted);
     }
 
-    private boolean isInvalidFormatterResponse(String formatted) {
+    private String fallbackFormat(List<Task> tasks) {
+        if (tasks.isEmpty()) {
+            return "Você não tem nenhuma tarefa nessa consulta.";
+        }
+
+        StringBuilder sb = new StringBuilder("Aqui está sua lista de tarefas:\n\n");
+        for (Task task : tasks) {
+            sb.append("- ").append(task.getTitle());
+
+            if (task.getDueDate() != null) {
+                sb.append(" (vence em ").append(task.getDueDate().toLocalDate()).append(")");
+            }
+
+            sb.append("\n");
+        }
+
+        return sb.toString();
+    }
+
+    private boolean isInvalidFormatterResponse(String formatted, List<Task> tasks) {
         if (formatted == null || formatted.isBlank()) {
             return true;
         }
         String normalized = formatted.strip();
-        return normalized.regionMatches(true, 0, "User Safety:", 0, "User Safety:".length())
-                || normalized.length() < 3;
+        if (normalized.regionMatches(true, 0, "User Safety:", 0, "User Safety:".length())) {
+            return true;
+        }
+        if (normalized.length() < 3) {
+            return true;
+        }
+        if (!tasks.isEmpty()) {
+            boolean containsAnyTitle = tasks.stream()
+                    .anyMatch(task -> normalized.contains(task.getTitle()));
+            if (!containsAnyTitle) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private List<TaskSuggestion> toSuggestions(List<SuggestionData> raw) {
