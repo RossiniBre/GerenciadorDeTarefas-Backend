@@ -32,7 +32,8 @@ class RejectTaskSuggestionUseCaseTest {
                 "token",
                 new AssistantSession(
                         List.of(),
-                        List.of(suggestion)
+                        List.of(suggestion),
+                        null
                 )
         );
 
@@ -57,7 +58,8 @@ class RejectTaskSuggestionUseCaseTest {
                 "token",
                 new AssistantSession(
                         List.of(),
-                        List.of()
+                        List.of(),
+                        null
                 )
         );
 

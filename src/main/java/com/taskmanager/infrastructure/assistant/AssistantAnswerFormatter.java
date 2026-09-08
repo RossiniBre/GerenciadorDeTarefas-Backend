@@ -71,10 +71,6 @@ public class AssistantAnswerFormatter implements AnswerFormatter {
                         )
                 ),
                 "max_tokens", 1024,
-                // Pede ao provedor para pular a etapa de raciocínio estendido,
-                // caso o modelo sorteado pelo auto-router a suporte. Isso evita
-                // que uma fatia grande do max_tokens seja consumida "pensando"
-                // antes de gerar a resposta final, reduzindo o risco de corte.
                 "reasoning", Map.of("exclude", true)
         );
 

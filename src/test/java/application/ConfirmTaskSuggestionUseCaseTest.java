@@ -73,7 +73,7 @@ class ConfirmTaskSuggestionUseCaseTest {
                 suggestionId, "Titulo sugerido", "Descricao sugerida",
                 TaskPriority.HIGH, TaskCategory.WORK, null, null
         );
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         useCase.execute(TOKEN, owner, suggestionId);
 
@@ -94,7 +94,7 @@ class ConfirmTaskSuggestionUseCaseTest {
                 suggestionId, existing.getId(), "Titulo novo", "Descricao nova",
                 TaskPriority.MEDIUM, TaskCategory.STUDY, null, null
         );
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         useCase.execute(TOKEN, owner, suggestionId);
 
@@ -110,7 +110,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Delete suggestion = new TaskSuggestion.Delete(suggestionId, existing.getId());
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         useCase.execute(TOKEN, owner, suggestionId);
 
@@ -124,7 +124,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Start suggestion = new TaskSuggestion.Start(suggestionId, existing.getId());
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         useCase.execute(TOKEN, owner, suggestionId);
 
@@ -140,7 +140,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Complete suggestion = new TaskSuggestion.Complete(suggestionId, existing.getId());
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         useCase.execute(TOKEN, owner, suggestionId);
 
@@ -158,7 +158,7 @@ class ConfirmTaskSuggestionUseCaseTest {
         TaskSuggestion.Start confirmed = new TaskSuggestion.Start(confirmedId, existing.getId());
         TaskSuggestion.Delete other = new TaskSuggestion.Delete(otherId, existing.getId());
 
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(confirmed, other)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(confirmed, other), null));
 
         useCase.execute(TOKEN, owner, confirmedId);
 
@@ -178,7 +178,7 @@ class ConfirmTaskSuggestionUseCaseTest {
     @Test
     void shouldThrowWhenSuggestionIdDoesNotMatchAnyPending() {
         TaskSuggestion.Start suggestion = new TaskSuggestion.Start(UUID.randomUUID(), "some-task-id");
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         UUID unknownId = UUID.randomUUID();
 
@@ -194,7 +194,7 @@ class ConfirmTaskSuggestionUseCaseTest {
 
         UUID suggestionId = UUID.randomUUID();
         TaskSuggestion.Start suggestion = new TaskSuggestion.Start(suggestionId, existing.getId());
-        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion)));
+        sessionRepository.save(TOKEN, new AssistantSession(List.of(), List.of(suggestion), null));
 
         assertThrows(UnauthorizedTaskAccessException.class,
                 () -> useCase.execute(TOKEN, owner, suggestionId));

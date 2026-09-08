@@ -91,6 +91,7 @@ class AssistantResponseTest {
                 new AssistantContext(
                         List.of(userMessage),
                         List.of(),
+                        null,
                         UUID.randomUUID().toString()
                 )
         );

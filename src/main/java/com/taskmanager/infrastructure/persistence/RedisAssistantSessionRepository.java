@@ -1,6 +1,6 @@
 package com.taskmanager.infrastructure.persistence;
 
-import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.taskmanager.domain.assistant.AssistantSession;
 import com.taskmanager.domain.repositories.AssistantSessionRepository;
 import redis.clients.jedis.JedisPool;
@@ -13,11 +13,11 @@ public class RedisAssistantSessionRepository implements AssistantSessionReposito
     private static final int TTL_SECONDS = 1800;
 
     private final JedisPool jedisPool;
-    private final Gson gson;
+    private final ObjectMapper objectMapper;
 
-    public RedisAssistantSessionRepository(JedisPool jedisPool, Gson gson) {
+    public RedisAssistantSessionRepository(JedisPool jedisPool, ObjectMapper objectMapper) {
         this.jedisPool = jedisPool;
-        this.gson = gson;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -27,15 +27,19 @@ public class RedisAssistantSessionRepository implements AssistantSessionReposito
             if (json == null) {
                 return Optional.empty();
             }
-            return Optional.of(gson.fromJson(json, AssistantSession.class));
+            return Optional.of(objectMapper.readValue(json, AssistantSession.class));
+        } catch (Exception e) {
+            throw new IllegalStateException("Falha ao desserializar sessão do assistente. token=" + token, e);
         }
     }
 
     @Override
     public void save(String token, AssistantSession session) {
         try (var jedis = jedisPool.getResource()) {
-            String json = gson.toJson(session);
+            String json = objectMapper.writeValueAsString(session);
             jedis.setex(KEY_PREFIX + token, TTL_SECONDS, json);
+        } catch (Exception e) {
+            throw new IllegalStateException("Falha ao serializar sessão do assistente. token=" + token, e);
         }
     }
 

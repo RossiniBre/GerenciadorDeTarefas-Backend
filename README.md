@@ -1,4 +1,4 @@
-# Task Nexus - Backend
+# TaskNexus - Backend
 
 A task management backend built incrementally to learn **Clean Architecture**, **SOLID**, **Design Patterns**, **Domain-Driven Design (DDD)**, and **Spec-Driven Development** using Java.
 
@@ -128,7 +128,7 @@ The project uses unit, integration, and end-to-end API testing.
 
 ### Current Results
 
-- **127 JUnit tests passing**
+- **130 JUnit tests passing**
 - **99 Postman tests passing**
 - MySQL integration tests
 - Real SMTP email delivery tests

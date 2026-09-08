@@ -33,7 +33,8 @@ public class RejectTaskSuggestionUseCase {
                 token,
                 new AssistantSession(
                         session.conversationHistory(),
-                        remaining
+                        remaining,
+                        session.activeTask()
                 )
         );
     }

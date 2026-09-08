@@ -1,5 +1,8 @@
 package com.taskmanager.infrastructure.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.taskmanager.application.*;
@@ -99,8 +102,16 @@ public class AssistantWiringConfig {
     }
 
     @Bean
-    public AssistantSessionRepository assistantSessionRepository(JedisPool jedisPool, Gson assistantGson) {
-        return new RedisAssistantSessionRepository(jedisPool, assistantGson);
+    public ObjectMapper objectMapper() {
+        var mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return mapper;
+    }
+
+    @Bean
+    public AssistantSessionRepository assistantSessionRepository(JedisPool jedisPool, ObjectMapper objectMapper) {
+        return new RedisAssistantSessionRepository(jedisPool, objectMapper);
     }
 
     @Bean

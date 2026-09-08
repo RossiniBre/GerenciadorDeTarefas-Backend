@@ -11,6 +11,7 @@ import com.taskmanager.infrastructure.http.json.JsonMapper;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -79,32 +80,86 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
             IntentExtractionResult result = jsonMapper.fromJson(stripCodeFences(rawJson), IntentExtractionResult.class);
 
             if (result.type() == null || result.type().isBlank()) {
-                return new AssistantResponse.OutOfScope(
-                        "Não consegui interpretar sua mensagem. Pode reformular?");
+                return new AssistantResponse.OutOfScope("Não consegui interpretar sua mensagem. Pode reformular?");
             }
 
             return switch (result.type()) {
-                case "SUGGESTIONS" -> new AssistantResponse.ValidSuggestions(toSuggestions(result.suggestions()));
+                case "SUGGESTIONS" ->
+                        new AssistantResponse.ValidSuggestions(toSuggestions(result.suggestions(), context.validActiveTask()));
                 case "LISTING" -> handleListing(result.filter(), context.requesterId());
                 case "MISSING_INFO" -> new AssistantResponse.MissingInfos(result.question());
                 case "OUT_OF_SCOPE" -> new AssistantResponse.OutOfScope(result.reason());
                 case "INFORMATIONAL" -> new AssistantResponse.InformationalAnswer(result.answer());
-                default -> new AssistantResponse.OutOfScope(
-                        "Não consegui interpretar sua mensagem. Pode reformular?");
+                default -> new AssistantResponse.OutOfScope("Não consegui interpretar sua mensagem. Pode reformular?");
             };
 
         } catch (RuntimeException e) {
             System.out.println("Falha ao interpretar resposta da IA. rawJson=" + rawJson);
             e.printStackTrace();
-            return new AssistantResponse.OutOfScope(
-                    "Não consegui interpretar sua mensagem. Pode reformular?");
+            return new AssistantResponse.OutOfScope("Não consegui interpretar sua mensagem. Pode reformular?");
         }
+    }
+
+    private List<TaskSuggestion> toSuggestions(List<SuggestionData> raw, ActiveTask activeTask) {
+        return raw.stream().map(data -> toSuggestion(data, activeTask)).toList();
+    }
+
+    private TaskSuggestion toSuggestion(SuggestionData data, ActiveTask activeTask) {
+        UUID id = UUID.randomUUID();
+        LocalDateTime reminderDate = parseDateOrNull(data.reminderDate());
+
+        return switch (data.action()) {
+            case "CREATE" -> new TaskSuggestion.Create(id, data.title(), data.description(),
+                    EnumParser.parse(TaskPriority.class, data.priority()),
+                    EnumParser.parse(TaskCategory.class, data.category()),
+                    parseDateOrNull(data.dueDate()), reminderDate);
+
+            case "UPDATE" -> new TaskSuggestion.Update(id,
+                    resolveTargetTaskId(data, activeTask),
+                    data.title(), data.description(),
+                    EnumParser.parse(TaskPriority.class, data.priority()),
+                    EnumParser.parse(TaskCategory.class, data.category()),
+                    resolveDueDate(data, activeTask), reminderDate);
+
+            case "DELETE" -> new TaskSuggestion.Delete(id, resolveTargetTaskId(data, activeTask));
+            case "START" -> new TaskSuggestion.Start(id, resolveTargetTaskId(data, activeTask));
+            case "COMPLETE" -> new TaskSuggestion.Complete(id, resolveTargetTaskId(data, activeTask));
+            default -> throw new IllegalStateException("Ação desconhecida: " + data.action());
+        };
+    }
+
+    private String resolveTargetTaskId(SuggestionData data, ActiveTask activeTask) {
+        if (data.referenceActiveTask()) {
+            if (activeTask == null) {
+                throw new IllegalStateException(
+                        "IA referenciou a tarefa ativa, mas não há nenhuma tarefa ativa válida na sessão.");
+            }
+            return activeTask.id().toString();
+        }
+        return data.targetTaskId();
+    }
+
+    private LocalDateTime resolveDueDate(SuggestionData data, ActiveTask activeTask) {
+        if (data.keepDueDate()) {
+            LocalDate baseDate = resolveBaseDateForKeep(data, activeTask);
+            LocalTime newTime = LocalTime.parse(data.dueTime());
+            return LocalDateTime.of(baseDate, newTime);
+        }
+        return parseDateOrNull(data.dueDate());
+    }
+
+    private LocalDate resolveBaseDateForKeep(SuggestionData data, ActiveTask activeTask) {
+        if (data.referenceActiveTask() && activeTask != null) {
+            return activeTask.dueDate().toLocalDate();
+        }
+        throw new UnsupportedOperationException(
+                "keepDueDate com targetTaskId explícito ainda não implementado");
     }
 
     private String buildEnrichedContext(AssistantContext context, List<Task> currentTasks) {
         List<Message> history = context.conversationHistory();
         List<Message> priorMessages = history.isEmpty() ? List.of() : history.subList(0, history.size() - 1);
-        Message currentMessage = history.isEmpty() ? null : history.get(history.size() - 1);
+        Message currentMessage = history.isEmpty() ? null : history.getLast();
 
         StringBuilder sb = new StringBuilder();
 
@@ -149,6 +204,17 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
                 sb.append("\n");
             }
             sb.append("\n");
+        }
+
+        sb.append("=== Tarefa em foco no momento ===\n\n");
+        ActiveTask active = context.validActiveTask();
+        if (active != null) {
+            sb.append("id=").append(active.id())
+                    .append(", título=\"").append(active.title()).append("\"")
+                    .append(", prazo=").append(active.dueDate())
+                    .append("\n(Se o usuário disser \"essa tarefa\", \"do mesmo dia\", \"ela\" etc., é esta.)\n\n");
+        } else {
+            sb.append("Nenhuma.\n\n");
         }
 
         sb.append("=== Nova mensagem ===\n\n");
@@ -257,36 +323,9 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
         if (!tasks.isEmpty()) {
             boolean containsAnyTitle = tasks.stream()
                     .anyMatch(task -> normalized.contains(task.getTitle()));
-            if (!containsAnyTitle) {
-                return true;
-            }
+            return !containsAnyTitle;
         }
         return false;
-    }
-
-    private List<TaskSuggestion> toSuggestions(List<SuggestionData> raw) {
-        return raw.stream().map(this::toSuggestion).toList();
-    }
-
-    private TaskSuggestion toSuggestion(SuggestionData data) {
-        UUID id = UUID.randomUUID();
-        LocalDateTime dueDate = parseDateOrNull(data.dueDate());
-        LocalDateTime reminderDate = parseDateOrNull(data.reminderDate());
-
-        return switch (data.action()) {
-            case "CREATE" -> new TaskSuggestion.Create(id, data.title(), data.description(),
-                    EnumParser.parse(TaskPriority.class, data.priority()),
-                    EnumParser.parse(TaskCategory.class, data.category()),
-                    dueDate, reminderDate);
-            case "UPDATE" -> new TaskSuggestion.Update(id, data.targetTaskId(), data.title(), data.description(),
-                    EnumParser.parse(TaskPriority.class, data.priority()),
-                    EnumParser.parse(TaskCategory.class, data.category()),
-                    dueDate, reminderDate);
-            case "DELETE" -> new TaskSuggestion.Delete(id, data.targetTaskId());
-            case "START" -> new TaskSuggestion.Start(id, data.targetTaskId());
-            case "COMPLETE" -> new TaskSuggestion.Complete(id, data.targetTaskId());
-            default -> throw new IllegalStateException("Ação desconhecida: " + data.action());
-        };
     }
 
     private LocalDateTime parseDateOrNull(String value) {
@@ -299,15 +338,5 @@ public class TaskAssistantOrchestrator implements TaskAssistant {
             System.out.println("Data inválida retornada pela IA, ignorando: " + value);
             return null;
         }
-    }
-
-    private String lastUserMessage(List<Message> history) {
-        for (int i = history.size() - 1; i >= 0; i--) {
-            Message message = history.get(i);
-            if (message.author() == MessageAuthor.USER) {
-                return message.content();
-            }
-        }
-        throw new IllegalArgumentException("Histórico não contém nenhuma mensagem do usuário!");
     }
 }

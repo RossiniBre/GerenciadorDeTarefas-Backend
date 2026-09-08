@@ -64,6 +64,7 @@ class TaskAssistantOrchestratorErrorHandlingTest {
                 new AssistantContext(
                         List.of(new Message(MessageAuthor.USER, "deletar tarefa estudar java")),
                         List.of(),
+                        null,
                         "user-123"
                 )
         );
@@ -83,6 +84,7 @@ class TaskAssistantOrchestratorErrorHandlingTest {
                 new AssistantContext(
                         List.of(new Message(MessageAuthor.USER, "oi")),
                         List.of(),
+                        null,
                         "user-123"
                 )
         );
@@ -99,6 +101,7 @@ class TaskAssistantOrchestratorErrorHandlingTest {
                 new AssistantContext(
                         List.of(new Message(MessageAuthor.USER, "oi")),
                         List.of(),
+                        null,
                         "user-123"
                 )
         );
