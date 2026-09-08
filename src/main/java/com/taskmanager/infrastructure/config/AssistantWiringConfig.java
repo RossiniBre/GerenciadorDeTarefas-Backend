@@ -98,7 +98,10 @@ public class AssistantWiringConfig {
 
     @Bean(destroyMethod = "close")
     public JedisPool jedisPool() {
-        return new JedisPool("localhost", 6379);
+        String host = System.getenv("REDIS_HOST");
+        int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
+
+        return new JedisPool(host, port);
     }
 
     @Bean
