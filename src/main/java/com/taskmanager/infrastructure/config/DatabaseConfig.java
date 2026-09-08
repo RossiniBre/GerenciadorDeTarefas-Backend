@@ -25,6 +25,10 @@ public class DatabaseConfig {
     public void setPassword(String password) { this.password = password; }
 
     public String getUrl() {
-        return String.format("jdbc:mysql://%s:%s/taskmanager", this.host, this.port);
+        return String.format(
+                "jdbc:mysql://%s:%s/defaultdb?ssl-mode=REQUIRED",
+                this.host,
+                this.port
+        );
     }
 }
