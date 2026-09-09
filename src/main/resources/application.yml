@@ -20,6 +20,17 @@ spring:
           auth: true
           starttls:
             enable: true
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+    password: ${REDIS_PASSWORD}
+    username: ${REDIS_USERNAME}
+    timeout: 60000ms
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
 
 db:
   host: ${DB_HOST}
@@ -27,7 +38,7 @@ db:
   user: ${DB_USER}
   password: ${DB_PASSWORD}
 
-assistant:
+A:
   api-key: ${ASSISTANT_API_KEY}
 
 mail:

@@ -18,6 +18,7 @@ import com.taskmanager.infrastructure.persistence.TaskSuggestionAdapter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
@@ -100,8 +101,15 @@ public class AssistantWiringConfig {
     public JedisPool jedisPool() {
         String host = System.getenv("REDIS_HOST");
         int port = Integer.parseInt(System.getenv().getOrDefault("REDIS_PORT", "6379"));
+        String password = System.getenv("REDIS_PASSWORD");
+        String username = System.getenv().getOrDefault("REDIS_USERNAME", "default");
 
-        return new JedisPool(host, port);
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setMaxTotal(8);
+        config.setMaxIdle(8);
+        config.setMinIdle(0);
+
+        return new JedisPool(config, host, port, 2000, password, 0, null);
     }
 
     @Bean
